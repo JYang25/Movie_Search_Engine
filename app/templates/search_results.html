@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1> this is the result page </h1>
+    
+    {% for res in results %}
+        <p> Movie ID: {{res[0]}}, Title: {{res[1]}}, Starring: {{res[2]}}, Director: {{res[3]}}, Total Score: {{res[-1]}}</p>
+    {% endfor %}
+    
+
+
+{% endblock %}
+
+
+
+
+

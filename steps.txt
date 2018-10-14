@@ -1,0 +1,9 @@
+1. virtual environment
+virtualenv SE
+
+2. activate environment
+source SE/bin/activate
+
+3. install required packages, flask, wtf-form, nltk.
+
+4. export FLASK_APP=movie_search.py
