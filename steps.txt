@@ -4,6 +4,6 @@ virtualenv SE
 2. activate environment
 source SE/bin/activate
 
-3. install required packages, flask, wtf-form, nltk.
+3. install required packages, flask, wtf-form, nltk, pandas.
 
 4. export FLASK_APP=movie_search.py

@@ -1,2 +1,6 @@
 /data
 /SE
+/env
+*.pyc
+*.swp
+*.DS_Store
