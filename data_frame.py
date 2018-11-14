@@ -13,7 +13,8 @@ def getDataFrame():
             if line_count != 0:
                 data.loc[int(row[0]),int(row[1])] = float(row[2]) 
             else:
-                print(f'Column names are {", ".join(row)}')
+                print("")
+                # print(f'Column names are {", ".join(row)}')
             line_count += 1
         _=data.fillna(0,inplace=True)  
         movieid={}  
@@ -27,5 +28,5 @@ def getDataFrame():
 
 ratingMat,movieDict,userDict=getDataFrame()
 # print(ratingMat)
-# print(shape(ratingMat)[0])
+print(f'{shape(ratingMat)[0]} users')
 # print(shape(ratingMat)[1])
