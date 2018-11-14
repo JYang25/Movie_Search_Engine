@@ -54,10 +54,10 @@ def recommend(userid, N=20, simMeans = cosSim, estMethod = standEst, dataSet=rat
     return sorted(itemScores,key = lambda pp: pp[1],reverse = True)[:N]
 
 def recommTop20(userid):
-    recommend(userid, 20, cosSim, standEst)
+    return recommend(int(userid), 100, cosSim, standEst)
 
 def recommByGenre(userid, genre):
-    recommend(userid, 20, cosSim, standEst, genre)
+    return recommend(int(userid), 100, cosSim, standEst, ratingMat, genre)
 
 def getRecommRate(userid, movieid):
-    return float("{0:.2f}".format(estMethod(dataSet, userid, cosSim, movieid)))
+    return float("{0:.2f}".format(standEst(ratingMat, int(userid), cosSim, int(movieid))))
