@@ -3,12 +3,13 @@ from nltk.stem.snowball import SnowballStemmer
 import re
 import math
 
+from recomm import getRecommRate
 
 
 
 
 
-def QueryEvaluation(query, Index, Movies):
+def QueryEvaluation(query, Index, Movies, userid):
     st = SnowballStemmer("english") 
     terms = set()
     docs = set()
@@ -42,7 +43,7 @@ def QueryEvaluation(query, Index, Movies):
         # add vote and rate score to total score
         score += float(Movies[d].GetPopularity()) + float(Movies[d].GetVote())
         
-        ans.append(list([d, M[d].GetTitle(), M[d].GetStar(), M[d].GetDirector(), score]))
+        ans.append(list([d, M[d].GetTitle(), M[d].GetStar(), M[d].GetDirector(), score, getRecommRate(userid, d)]))
         
     ans = sorted(ans, key=lambda x:x[-1], reverse=True)
     
