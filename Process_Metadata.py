@@ -7,6 +7,9 @@ import csv
 import io
 from nltk.stem.snowball import SnowballStemmer
 import re
+import json
+from csv import reader
+
 
 class Movie(object):
     def __init__(self):
@@ -17,6 +20,87 @@ class Movie(object):
         self.overview = ''
         self.popularity = 0
         self.vote = 0
+        self.genres = 'Other'
+        
+        # for language model
+        # get total number of words in a document
+        self.totalcount = 0
+        
+        # a word list of count of each word in a movie
+        self.wordlist = {}
+        
+    def GetGenres(self):
+        return self.genres
+
+    def SetGenres(self, genres):
+        #print(genres)
+        # read genres information from the string
+        if genres.find('Comedy') != -1:
+            self.genres = 'Comedy'
+        elif genres.find('Horror') != -1:
+            self.genres = 'Horror'
+        elif genres.find('Animation') != -1:
+            self.genres = 'Animation'
+        elif genres.find('History') != -1:
+            self.genres = 'History'
+        elif genres.find('Drama') != -1:
+            self.genres = 'Drama'
+        elif genres.find('Action') != -1:
+            self.genres = 'Action'  
+        elif genres.find('Adventure') != -1:
+            self.genres = 'Adventure'
+        elif genres.find('Crime') != -1:
+            self.genres = 'Crime'  
+        elif genres.find('Romance') != -1:
+            self.genres = 'Romance'  
+        elif genres.find('Thriller') != -1:
+            self.genres = 'Thriller'  
+        elif genres.find('Fantasy') != -1:
+            self.genres = 'Fantasy'  
+        elif genres.find('Family') != -1:
+            self.genres = 'Family'  
+        elif genres.find('Fiction') != -1:
+            self.genres = 'Fiction'  
+            
+        elif genres.find('Mystery') != -1:
+            self.genres = 'Mystery'  
+            
+        elif genres.find('War') != -1:
+            self.genres = 'War'  
+            
+        elif genres.find('Music') != -1:
+            self.genres = 'Music'      
+            
+        elif genres.find('Documentary') != -1:
+            self.genres = 'Documentary'            
+            
+        elif genres.find('Foreign') != -1:
+            self.genres = 'Foreign'       
+        else:
+            self.genres = 'Other'  
+        
+        
+        
+    def SetId(self, id):
+        self.id = id
+    
+    def GetId(self):
+        return self.id
+    
+    def GetWordList(self):
+        return self.wordlist
+        
+    def AddWordList(self, w):
+        if w in self.wordlist:
+            self.wordlist[w] += 1
+        else:
+            self.wordlist[w] = 1
+    
+    def IncTotalCnt(self, cnt):
+        self.totalcount += cnt
+    
+    def GetTotalCnt(self):
+        return self.totalcount
         
     def GetTitle(self):
         return self.title
@@ -125,12 +209,20 @@ def LoadMovie():
                 if len(row) < 20:    # omit movies with incomplete information
                     continue
                 
+                            
+
                 # set title for the movie
                 if row[5] in Movies:
                     Movies[row[5]].SetTitle(row[8])
                 else:
                     Movies[row[5]] = Movie()
                     Movies[row[5]].SetTitle(row[8])
+                
+                # set genres for the movie  
+                Movies[row[5]].SetGenres(row[3])
+                #print(Movies[row[5]].GetTitle(), Movies[row[5]].GetId())
+                #print(Movies[row[5]].GetGenres())
+                
                 
                 # set overview for the movie
                 Movies[row[5]].SetOverview(row[9])
@@ -140,6 +232,10 @@ def LoadMovie():
                 
                 # set vote
                 Movies[row[5]].SetVote(row[22])
+                
+                # set id
+                # set id 
+                Movies[row[5]].SetId(row[5])               
     
     return Movies            
                 
@@ -148,7 +244,7 @@ def LoadMovie():
 #        print(v.GetTitle(), v.GetStar(), v.GetDirector(), v.GetPopularity(), v.GetVote(), v.GetOverview())
     
 
-def ParseWords(k, line, Index, st):
+def ParseWords(k, line, Index, st, v):
     line = re.sub(r'[\'|\d+|\-]', ' ', line)
     line = re.sub(r'[^(\w)|(\s+)]', '', line)
     arr = line.split()
@@ -159,7 +255,15 @@ def ParseWords(k, line, Index, st):
             Index[w] = Idx()
         else:
             Index[w].IncCnt()
-        Index[w].AddId(k)    
+        Index[w].AddId(k) 
+        
+        # add this word to the word list of the movie
+        # v is the Movie class
+        v.AddWordList(w)
+        
+        
+    # get the length of the arr for word count of a movie
+    return len(arr)
 
 def Create_Index(Movies):
     st = SnowballStemmer("english")
@@ -167,13 +271,13 @@ def Create_Index(Movies):
     
     for k, v in Movies.items():
         # get words from title
-        ParseWords(k, v.GetTitle(), Index, st)
+        v.IncTotalCnt(ParseWords(k, v.GetTitle(), Index, st, v))
         # get words from Starring
-        ParseWords(k, v.GetStar(), Index, st)
+        v.IncTotalCnt(ParseWords(k, v.GetStar(), Index, st, v))
         # get words from Director
-        ParseWords(k, v.GetDirector(), Index, st)     
+        v.IncTotalCnt(ParseWords(k, v.GetDirector(), Index, st, v))     
         # get words from Overview
-        ParseWords(k, v.GetOverview(), Index, st)           
+        v.IncTotalCnt(ParseWords(k, v.GetOverview(), Index, st, v))           
  
     return Index        
        
@@ -181,9 +285,10 @@ def Create_Index(Movies):
 #        print(k2, v2.GetTf())
                 
 
+
 M = LoadMovie()
-
 I = Create_Index(M)
-
-
-
+# print(M['862'].GetTotalCnt())
+# print(M['862'].GetWordList())
+# print(M['9091'].GetTotalCnt())
+# print(M['9091'].GetWordList())

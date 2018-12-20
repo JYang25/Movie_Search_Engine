@@ -2,7 +2,7 @@ import csv
 from numpy import *
 from pandas import *
 from numpy import linalg as la
-from Process_Metadata import LoadMovie, M
+from Process_Metadata import LoadMovie
 
 def getDataFrame():
     with open('./data/ratings_test.csv') as csvfile:
@@ -28,5 +28,5 @@ def getDataFrame():
 
 ratingMat,movieDict,userDict=getDataFrame()
 # print(ratingMat)
-print(f'{shape(ratingMat)[0]} users')
+# print(f'{shape(ratingMat)[0]} users')
 # print(shape(ratingMat)[1])

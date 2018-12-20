@@ -49,12 +49,28 @@ def recommend(userid, N=20, simMeans = cosSim, estMethod = standEst, dataSet=rat
         return 'every movie have been rate'
     itemScores = [] 
     for item in unratedItems:
-        estimatedScore = float("{0:.2f}".format(estMethod(dataSet,userid,simMeans,item)))
-        itemScores.append((movieDict[item],estimatedScore))
+        if str(movieDict[item]) in M:
+            if genre != "":
+                if M[str(movieDict[item])].GetGenres() == genre:
+                    estimatedScore = float("{0:.2f}".format(estMethod(dataSet,userid,simMeans,item)))
+                    if estimatedScore > 0:
+                        itemScores.append((movieDict[item],estimatedScore))
+            else:
+                estimatedScore = float("{0:.2f}".format(estMethod(dataSet,userid,simMeans,item)))
+                if estimatedScore > 0:
+                    itemScores.append((movieDict[item],estimatedScore))
+        
+            # print(M[str(movieDict[item])].GetGenres())
+        
     return sorted(itemScores,key = lambda pp: pp[1],reverse = True)[:N]
 
-def recommTop20(userid):
-    return recommend(int(userid), 100, cosSim, standEst)
+def recommTop20(userid, metric):
+    if metric == "cosine":
+        return recommend(int(userid), 100, cosSim, standEst)
+    elif metric == "pearson":
+        return recommend(int(userid), 100, pearsSim, standEst)
+    elif metric == "euclidean":
+        return recommend(int(userid), 100, ecludSim, standEst)
 
 def recommByGenre(userid, genre):
     return recommend(int(userid), 100, cosSim, standEst, ratingMat, genre)

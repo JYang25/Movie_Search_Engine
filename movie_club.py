@@ -2,7 +2,7 @@ import time
 import sys
 
 
-toolbar_width = 200
+toolbar_width = 300
 
 # setup toolbar
 

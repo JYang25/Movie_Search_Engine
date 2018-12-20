@@ -1,4 +1,4 @@
-from Process_Metadata import LoadMovie, Movie, Create_Index, ParseWords, Idx, M, I
+from Process_Metadata import LoadMovie, Movie, Create_Index, ParseWords
 from nltk.stem.snowball import SnowballStemmer
 import re
 import math
@@ -9,7 +9,16 @@ from recomm import getRecommRate, movieDict
 
 
 
-def QueryEvaluation(query, Index, Movies, userid="0"):
+def QueryEvaluation(query, Index, Movies, userid, option):
+    if option == 'tf-idf':
+        return tf_idf(query, Index, Movies, userid)
+    elif option == 'language-model':
+        # print("Still working on language model")
+        return LanguageModel(query, Index, Movies, userid)
+    else:
+        pass    
+
+def tf_idf(query, Index, Movies, userid):
     st = SnowballStemmer("english") 
     terms = set()
     docs = set()
@@ -41,20 +50,59 @@ def QueryEvaluation(query, Index, Movies, userid="0"):
                 score += (1 + math.log2(tf)) * (math.log2(N/dft))
         
         # add vote and rate score to total score
-        score += float(Movies[d].GetPopularity()) + float(Movies[d].GetVote())
+        # do log transformed popularity and votes. Make them the same scale as tf-idf
+        # score += float(Movies[d].GetPopularity()) + float(Movies[d].GetVote())
+        # score += math.log10(float(Movies[d].GetPopularity())) + math.log10(float(Movies[d].GetVote()))
         
+        # ans.append(list([d, Movies[d].GetTitle(), Movies[d].GetStar(), Movies[d].GetDirector(), score]))
         if d in movieDict:
-            ans.append(list([d, M[d].GetTitle(), M[d].GetStar(), M[d].GetDirector(), score, getRecommRate(userid, d)]))
+            ans.append(list([d, Movies[d].GetGenres(), Movies[d].GetTitle(), Movies[d].GetStar(), Movies[d].GetDirector(), score, getRecommRate(userid, d)]))
         else:
-            ans.append(list([d, M[d].GetTitle(), M[d].GetStar(), M[d].GetDirector(), score, float(0)]))
-        
+            ans.append(list([d, Movies[d].GetGenres(), Movies[d].GetTitle(), Movies[d].GetStar(), Movies[d].GetDirector(), score, float(0)]))
     ans = sorted(ans, key=lambda x:x[-1], reverse=True)
-    
     # print(ans)
-    return ans        
-    
+    return ans 
             
-QueryEvaluation('Caesar Rome', I, M)            
+def LanguageModel(query, Index, Movies, userid):
+    # for each movie in movies, get the meta information, and probability of the counts
+    # then use the probability as score, then do the ranking
+    lowpro = 0.000001   # a small value 
+    
+    st = SnowballStemmer("english") 
+    terms = set()    
+    for t in query.split():
+        t = st.stem(t.lower())
+        terms.add(t)
+    
+    # print(terms)
+          
+    ans = []
+    for k, v in Movies.items():
+        # print(k, v)
+        p = 1
+        wl = v.GetWordList()
+        #print(wl)
+        #print("******************")
+        
+        for t in terms:
+            if t in wl:
+                #print(t, wl[t])
+                p *= wl[t] / v.GetTotalCnt()
+            else:
+                p *= lowpro
+        #print(p)
+        if v.GetId() in movieDict:
+            ans.append(list([v.GetId(), v.GetGenres(), v.GetTitle(), v.GetStar(), v.GetDirector(), p, getRecommRate(userid, d)]))
+        else:
+            ans.append(list([v.GetId(), v.GetGenres(), v.GetTitle(), v.GetStar(), v.GetDirector(), p, float(0)]))
+    #print(ans[:100])    
+    ans = sorted(ans, key=lambda x:x[-1], reverse=True)  
+    #print(ans[:100])   
+    
+    return ans[:100]
+
+
+# QueryEvaluation('Caesar Rome', I, M)            
             
 
 
