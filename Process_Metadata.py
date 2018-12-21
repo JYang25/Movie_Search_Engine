@@ -168,7 +168,7 @@ def LoadMovie():
     # use id to represent movie, hash table to a class of movie data
     
     # Load starring and director information
-    with open('data/2/credits.csv', encoding="utf-8") as fin:
+    with open('./data/credits.csv', encoding="utf-8") as fin:
         csv_reader = csv.reader(fin, delimiter = ',')
         line_count = 0
         for row in csv_reader:
@@ -199,7 +199,7 @@ def LoadMovie():
                 
                 
     # Load other meta data
-    with open('data/2/movies_metadata.csv', encoding="utf-8") as fin:
+    with open('./data/movies_metadata.csv', encoding="utf-8") as fin:
         csv_reader = csv.reader(fin, delimiter = ',')
         line_count = 0
         for row in csv_reader:
