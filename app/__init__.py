@@ -1,3 +1,5 @@
+''' initiate the flask app '''
+
 from flask import Flask
 from Process_Metadata import LoadMovie, Movie, Create_Index, ParseWords, Idx
 # from Process_Metadata import LoadMovie, Movie
