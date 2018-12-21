@@ -1,6 +1,11 @@
 '''
-This script is to process the movie meta data
-
+Usage: This script is to process the movie meta data, construct the index for search engine.
+       Movie is a class to hold the movie meta data. Idx is a class to hold word frequency 
+       and which movie has this word. When we start the system, this script read the csv files
+       to construct the two indices.
+       
+Author: Jizhou Yang
+Date:   12-21-2018
 '''
 
 import csv
@@ -12,7 +17,11 @@ from csv import reader
 
 
 class Movie(object):
+    ''' This class contains movie meta data. This class is used for index construction '''
+    ''' Where key is the movie id and the value is this class '''
+    
     def __init__(self):
+        ''' initiate the class with default meta data '''
         self.title = ''
         self.star = ''
         self.director = ''
@@ -22,7 +31,7 @@ class Movie(object):
         self.vote = 0
         self.genres = 'Other'
         
-        # for language model
+        # this value is for language model
         # get total number of words in a document
         self.totalcount = 0
         
@@ -30,11 +39,12 @@ class Movie(object):
         self.wordlist = {}
         
     def GetGenres(self):
+        ''' Get the genres of this movie '''
         return self.genres
 
     def SetGenres(self, genres):
-        #print(genres)
-        # read genres information from the string
+        ''' Set the genres according to movie genres data '''
+        # check the genres from input 
         if genres.find('Comedy') != -1:
             self.genres = 'Comedy'
         elif genres.find('Horror') != -1:
@@ -61,111 +71,131 @@ class Movie(object):
             self.genres = 'Family'  
         elif genres.find('Fiction') != -1:
             self.genres = 'Fiction'  
-            
         elif genres.find('Mystery') != -1:
-            self.genres = 'Mystery'  
-            
+            self.genres = 'Mystery'   
         elif genres.find('War') != -1:
             self.genres = 'War'  
-            
         elif genres.find('Music') != -1:
             self.genres = 'Music'      
-            
         elif genres.find('Documentary') != -1:
             self.genres = 'Documentary'            
-            
         elif genres.find('Foreign') != -1:
             self.genres = 'Foreign'       
         else:
             self.genres = 'Other'  
         
-        
-        
     def SetId(self, id):
+        ''' set movie id '''
         self.id = id
     
     def GetId(self):
+        ''' get movie id '''
         return self.id
     
     def GetWordList(self):
+        ''' get word list of movie '''
         return self.wordlist
         
     def AddWordList(self, w):
+        ''' add a word to the movie's word list '''
         if w in self.wordlist:
             self.wordlist[w] += 1
         else:
             self.wordlist[w] = 1
     
     def IncTotalCnt(self, cnt):
+        ''' increase the total count of a word '''
         self.totalcount += cnt
     
     def GetTotalCnt(self):
+        ''' get the total count of words of this movie '''
         return self.totalcount
         
     def GetTitle(self):
+        ''' get the title of this movie '''
         return self.title
     
     def SetTitle(self, title):
+        ''' set title for this movie '''
         self.title = title
     
     def GetStar(self):
+        ''' get the star of this movie '''
         return self.star
     
     def SetStar(self, star):
+        ''' set star for this movie '''
         self.star = star    
     
     def GetDirector(self):
+        ''' get director of this movie '''
         return self.director
     
     def SetDirector(self, director):
+        ''' set director for this movie '''
         self.director = director     
         
     def GetPopularity(self):
+        ''' get popularity score '''
         return self.popularity
     
     def SetPopularity(self, popularity):
+        ''' set popularity score '''
         self.popularity = popularity      
         
     def GetVote(self):
+        ''' get vote value of this movie '''
         return self.vote
     
     def SetVote(self, vote):
+        ''' set vote value of this movie '''
         self.vote = vote    
         
     def GetOverview(self):
+        ''' get overview of this movie '''
         return self.overview
     
     def SetOverview(self, overview):
+        ''' set overview for this movie '''
         self.overview = overview
     
     
 class Idx(object):
+    ''' This class is also for index construction '''
+    ''' where the key is a word, and the value is this class '''
+    ''' to record which movie contains this word, and the total '''
+    ''' count of this word in the whole dataset '''
+    
     def __init__(self):
+        ''' initiate the class with default value '''
         self.cnt = 1
-        self.tf = {}   # key: doc ID, value: count
+        self.tf = {}   # term frequency of this word in each movie. key: doc ID, value: count
         
     def GetCnt(self):
+        ''' get count of this word '''
         return self.cnt
     
-    def IncCnt(self):   # increase the count of a word by 1
+    def IncCnt(self):
+        ''' increase the count of word by 1 '''
         self.cnt += 1
         
     def AddId(self, movie_id):
+        ''' add a movie id into term frequency dictionary '''
+        ''' when the movie contains this word '''
         if movie_id in self.tf:
             self.tf[movie_id] += 1  # increase the count of this word in the specific movie
         else:
             self.tf[movie_id] = 1   # initiate as 1
             
     def GetTf(self):
+        ''' get total frequency of a word '''
         return self.tf
         
         
 
 def LoadMovie():
-    
-    Movies = {}
-    
-    # use id to represent movie, hash table to a class of movie data
+    ''' read the csv file and construct index '''
+    Movies = {} # key is movie id, value is Movie class
     
     # Load starring and director information
     with open('./data/credits.csv', encoding="utf-8") as fin:
@@ -175,11 +205,6 @@ def LoadMovie():
             if line_count == 0:
                 line_count += 1
             else:
-            #    print(row[0])
-            #    print(row[1])
-            #    print(row[2])
-            #    print(type(row[2]), row[2])
-                
                 idx1 = row[0].find("'name':")
                 idx2 = row[0][idx1:].find(',')
                 star = row[0][idx1+9:idx1+idx2-1]    # remove the '' at begining and end
@@ -196,9 +221,8 @@ def LoadMovie():
                 idx4 = row[1][idx3+19:].find(',')
                 director = row[1][idx3+21:idx3+19+idx4-1]    # remove the '' at begining and end   
                 Movies[row[2]].SetDirector(director)
-                
-                
-    # Load other meta data
+                           
+    # Load other movie meta data
     with open('./data/movies_metadata.csv', encoding="utf-8") as fin:
         csv_reader = csv.reader(fin, delimiter = ',')
         line_count = 0
@@ -208,8 +232,6 @@ def LoadMovie():
             else:
                 if len(row) < 20:    # omit movies with incomplete information
                     continue
-                
-                            
 
                 # set title for the movie
                 if row[5] in Movies:
@@ -220,10 +242,7 @@ def LoadMovie():
                 
                 # set genres for the movie  
                 Movies[row[5]].SetGenres(row[3])
-                #print(Movies[row[5]].GetTitle(), Movies[row[5]].GetId())
-                #print(Movies[row[5]].GetGenres())
-                
-                
+
                 # set overview for the movie
                 Movies[row[5]].SetOverview(row[9])
                 
@@ -234,17 +253,15 @@ def LoadMovie():
                 Movies[row[5]].SetVote(row[22])
                 
                 # set id
-                # set id 
                 Movies[row[5]].SetId(row[5])               
     
     return Movies            
-                
-#    for k, v in Movies.items():
-#        print(k)
-#        print(v.GetTitle(), v.GetStar(), v.GetDirector(), v.GetPopularity(), v.GetVote(), v.GetOverview())
-    
+                    
 
 def ParseWords(k, line, Index, st, v):
+    ''' parse the text of movie meta data '''
+    
+    # remove symbols and extra spaces in the string
     line = re.sub(r'[\'|\d+|\-]', ' ', line)
     line = re.sub(r'[^(\w)|(\s+)]', '', line)
     arr = line.split()
@@ -261,14 +278,15 @@ def ParseWords(k, line, Index, st, v):
         # v is the Movie class
         v.AddWordList(w)
         
-        
     # get the length of the arr for word count of a movie
     return len(arr)
 
 def Create_Index(Movies):
+    ''' create index from movie data '''
+    
+    # initiate stem function
     st = SnowballStemmer("english")
     Index = {}   # an index for all the key words
-    
     for k, v in Movies.items():
         # get words from title
         v.IncTotalCnt(ParseWords(k, v.GetTitle(), Index, st, v))
@@ -281,14 +299,8 @@ def Create_Index(Movies):
  
     return Index        
        
-#    for k2, v2 in Index.items():
-#        print(k2, v2.GetTf())
-                
 
-
+# run the script to construct index and assign to variable 'M' and 'I'
 M = LoadMovie()
 I = Create_Index(M)
-# print(M['862'].GetTotalCnt())
-# print(M['862'].GetWordList())
-# print(M['9091'].GetTotalCnt())
-# print(M['9091'].GetWordList())
+
